@@ -31,7 +31,7 @@ class Table:
 
 class Node:
     def __init__(self, x, y):
-        self.state = [int(x), int(y)]
+        self.xyRobot = [int(x), int(y)]
         self.child = []
         self.parent = None
         self.action = None
@@ -39,6 +39,7 @@ class Node:
         self.cost = None
         self.butterMove = None
         self.xyButters = None
+        self.state = None
 
 
 class ForwardBFS:
@@ -62,17 +63,16 @@ class ForwardBFS:
             node = self.fringe.get()
             # print("dequeue node:", node.state)
             state = node.state
-            successor, action, butterMove = self.successor(node)
+            xyList, action, butterMove = self.successor(node)
             # print("current state: ", state)
             # print("current state xyButt: ", node.xyButters)
             # print("succ: ",successor)
             # print("action: ", action)
             # print("buttMove: ", butterMove)
-            for i, s in enumerate(successor):
-                # if s in self.explored:
-                #     continue
-                newNode = self.createNode(s[0], s[1], node, action[i], butterMove[i])
-                node.child.append(newNode)
+            for i, xy in enumerate(xyList):
+                newNode = self.createNode(xy[0], xy[1], node, action[i], butterMove[i])
+                if newNode.state in self.explored:
+                    continue
                 if self.checkGoal(newNode):
                     self.lastNode = newNode
                     return True
@@ -104,6 +104,7 @@ class ForwardBFS:
                     node.xyButters[butterIndex] = [x, y - 1]
                 elif action == 'D':
                     node.xyButters[butterIndex] = [x, y + 1]
+        node.state = [node.xyRobot, node.xyButters]
             # print("new node: state:", node.state, "parent state: ", parentNode.state,"parent buttLoc: ", parentNode.xyButters, "action: ", node.action, "buttLoc: ", node.xyButters)
         return node
 
@@ -115,9 +116,9 @@ class ForwardBFS:
         return False
 
     def successor(self, node):
-        x = node.state[0]
-        y = node.state[1]
-        sList = []
+        x = node.xyRobot[0]
+        y = node.xyRobot[1]
+        xyList = []
         actionList = []
         butterMove = []
         if x + 1 < self.tableInfo.column:
@@ -125,11 +126,11 @@ class ForwardBFS:
                 if [x + 1, y] in node.xyButters:
                     if self.checkButterCell(x + 1, y, 'R'):
                         butterMove.append(True)
-                        sList.append([x + 1, y])
+                        xyList.append([x + 1, y])
                         actionList.append('R')
                 else:
                     butterMove.append(False)
-                    sList.append([x + 1, y])
+                    xyList.append([x + 1, y])
                     actionList.append('R')
 
         if x - 1 >= 0:
@@ -137,11 +138,11 @@ class ForwardBFS:
                 if [x - 1, y] in node.xyButters:
                     if self.checkButterCell(x - 1, y, 'L'):
                         butterMove.append(True)
-                        sList.append([x - 1, y])
+                        xyList.append([x - 1, y])
                         actionList.append('L')
                 else:
                     butterMove.append(False)
-                    sList.append([x - 1, y])
+                    xyList.append([x - 1, y])
                     actionList.append('L')
 
         if y + 1 < self.tableInfo.row:
@@ -149,24 +150,24 @@ class ForwardBFS:
                 if [x, y + 1] in node.xyButters:
                     if self.checkButterCell(x, y + 1, 'D'):
                         butterMove.append(True)
-                        sList.append([x, y + 1])
+                        xyList.append([x, y + 1])
                         actionList.append('D')
                 else:
                     butterMove.append(False)
-                    sList.append([x, y + 1])
+                    xyList.append([x, y + 1])
                     actionList.append('D')
         if y - 1 >= 0:
             if self.checkRobotCell(x, y - 1):
                 if [x, y - 1] in node.xyButters:
                     if self.checkButterCell(x, y - 1, 'U'):
                         butterMove.append(True)
-                        sList.append([x, y - 1])
+                        xyList.append([x, y - 1])
                         actionList.append('U')
                 else:
                     butterMove.append(False)
-                    sList.append([x, y - 1])
+                    xyList.append([x, y - 1])
                     actionList.append('U')
-        return sList, actionList, butterMove
+        return xyList, actionList, butterMove
 
     def checkRobotCell(self, x, y):
         if self.tableInfo.matrix[y][x] == 'x':
