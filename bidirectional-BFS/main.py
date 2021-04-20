@@ -42,13 +42,13 @@ class Node:
         self.state = None
 
 
-class ForwardBFS:
+class BidirectionalBFS:
     def __init__(self, tableInfo):
         self.tableInfo = tableInfo
         self.path = []
         self.cost = 0
-        self.fringe = queue.Queue()
-        self.explored = []
+        self.forwardFringe = queue.Queue()
+        self.forwardExplored = []
         self.lastNode = None
 
     def searchAlgorithm(self):
@@ -56,11 +56,11 @@ class ForwardBFS:
         if self.checkGoal(initialNode):
             self.lastNode = initialNode
             return True
-        self.fringe.put(initialNode)
+        self.forwardFringe.put(initialNode)
         while True:
-            if self.fringe.empty():
+            if self.forwardFringe.empty():
                 return False
-            node = self.fringe.get()
+            node = self.forwardFringe.get()
             # print("dequeue node:", node.state)
             state = node.state
             xyList, action, butterMove = self.successor(node)
@@ -71,16 +71,16 @@ class ForwardBFS:
             # print("buttMove: ", butterMove)
             for i, xy in enumerate(xyList):
                 newNode = self.createNode(xy[0], xy[1], node, action[i], butterMove[i])
-                if newNode.state in self.explored:
+                if newNode.state in self.forwardExplored:
                     continue
                 if self.checkGoal(newNode):
                     self.lastNode = newNode
                     return True
 
                 # print("enqueue node:", newNode.state)
-                self.fringe.put(newNode)
-            self.explored.append(node.state)
-            print("explored: ", self.explored)
+                self.forwardFringe.put(newNode)
+            self.forwardExplored.append(node.state)
+            print("explored: ", self.forwardExplored)
 
     def createNode(self, x, y, parentNode, action, butterMove):
         node = Node(x, y)
@@ -189,7 +189,7 @@ class ForwardBFS:
             if y - 1 < 0 or self.tableInfo.matrix[y - 1][x] == 'x':
                 return False
         if action == 'D':
-            if y + 1 >= self.tableInfo.column or self.tableInfo.matrix[y + 1][x] == 'x':
+            if y + 1 >= self.tableInfo.row or self.tableInfo.matrix[y + 1][x] == 'x':
                 return False
         return True
 
@@ -225,7 +225,7 @@ def main():
     print(table.xyPersons)
     print(table.matrix)
 
-    fBfs = ForwardBFS(table)
+    fBfs = BidirectionalBFS(table)
 
     fBfs.calcPathAndCost()
 
