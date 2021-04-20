@@ -59,7 +59,6 @@ class BidirectionalBFS:
     def searchAlgorithm(self):
         initialNode = self.createInitialNode()
         finalNode = self.createFinalNode()
-
         if finalNode is None:
             return False
         if initialNode.state == finalNode.state:
@@ -94,10 +93,10 @@ class BidirectionalBFS:
                 # print("enqueue node:", newNode.state)
                 self.forwardFringe.put(newNode)
             self.forwardExplored.append(currNode)
-            print("explored: ", end="")
-            for exp in self.forwardExplored:
-                print(exp.state, end=", ")
-            print()
+            # print("explored: ", end="")
+            # for exp in self.forwardExplored:
+            #     print(exp.state, end=", ")
+            # print()
 
             # BACKWARD SEARCH
             if self.forwardFringe.empty():
@@ -115,10 +114,10 @@ class BidirectionalBFS:
                     return True
                 self.backwardFringe.put(newNode)
             self.backwardExplored.append(currNode)
-            print("back explored: ", end="")
-            for exp in self.backwardExplored:
-                print(exp.state, end=", ")
-            print()
+            # print("back explored: ", end="")
+            # for exp in self.backwardExplored:
+            #     print(exp.state, end=", ")
+            # print()
 
     def checkExplored(self, newNode, direction):
         newXYRobot = newNode.xyRobot
@@ -333,17 +332,17 @@ class BidirectionalBFS:
                     node = Node(x + 1, y)
                     node.action = 'L'
                     break
-            elif x - 1 >= 0:
+            if x - 1 >= 0:
                 if self.checkRobotCell(x - 1, y):
                     node = Node(x - 1, y)
                     node.action = 'R'
                     break
-            elif y + 1 < self.tableInfo.row:
+            if y + 1 < self.tableInfo.row:
                 if self.checkRobotCell(x, y + 1):
                     node = Node(x, y + 1)
                     node.action = 'U'
                     break
-            elif y - 1 >= 0:
+            if y - 1 >= 0:
                 if self.checkRobotCell(x, y - 1):
                     node = Node(x, y - 1)
                     node.action = 'D'
@@ -371,20 +370,16 @@ class BidirectionalBFS:
             while node.parent is not None:
                 self.path1.append(node.action)
                 self.cost += node.cost
-                print(node.cost)
                 node = node.parent
             self.cost += node.cost
-            print(node.cost)
             self.path1 = self.path1[::-1]
             node = self.backwardLastNode
             node.cost = 0
             while node.parent is not None:
                 self.path2.append(node.action)
                 self.cost += node.cost
-                print(node.cost)
                 node = node.parent
             self.cost += node.cost
-            print(node.cost)
             self.path = self.path1 + self.path2
 
 
@@ -394,14 +389,14 @@ def main():
     table.parseInput()
 
     # for test:
-    for i in range(row):
-        for j in range(column):
-            print(table.matrix[i][j], end=" ")
-        print()
-    print(table.xyRobot)
-    print(table.xyButters)
-    print(table.xyPersons)
-    print(table.matrix)
+    # for i in range(row):
+    #     for j in range(column):
+    #         print(table.matrix[i][j], end=" ")
+    #     print()
+    # print(table.xyRobot)
+    # print(table.xyButters)
+    # print(table.xyPersons)
+    # print(table.matrix)
 
     bbfs = BidirectionalBFS(table)
 
