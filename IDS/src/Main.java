@@ -14,6 +14,6 @@ public class Main {
         board.initial();
 
         // IDS Search
-        AIFunction.IDS(board);
+        //AIFunction.IDS(board);
     }
 }

@@ -9,14 +9,17 @@ public class AIFunction {
     public static String[] result = new String[3]; // Result = [Action, Cost, Depth]
     public static Board board = null;
 
-    public static void IDS(Node start, Node goal, Board board) {
-        this.board = board;
+    public static void IDS(Node start, Node goal, Board boardGame) {
+        board = boardGame;
         int limit = 0;
         Solution solution = null;
         while (solution != Solution.SOLUTION || solution != Solution.FAILURE) {//TODO condition
-            DLS(start, goal, limit);
+            solution = DLS(start, goal, limit);
             limit++;
         }
+        result[2] = limit + "";
+        if (solution == Solution.SOLUTION) System.out.println(result[0] + "\n" + result[1] + "\n" + result[2]);
+        else System.out.println("Can't pass the butter!");
     }
 
     enum Solution {
@@ -45,7 +48,6 @@ public class AIFunction {
         if (limit < 0) return Solution.FAILURE;
         for (int i = 0; i <= limit; i++) {
             if (goal.row == robot.row && goal.col == robot.col) {   // Check if robot is in goal state.
-                result[2] = limit + "";
                 return Solution.SOLUTION;
             } else if (limit == 0) {    // Check if limit is 0
                 return Solution.CUTOFF;
