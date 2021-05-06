@@ -9,3 +9,4 @@ class Node:
         self.butterMove = None
         self.xyButters = None
         self.state = None
+        self.evaluation = None

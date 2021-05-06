@@ -79,7 +79,7 @@ class BidirectionalBFS:
             #     print(exp.state, end=", ")
             # print()
 
-    def checkExplored(self, newNode, direction):
+    def checkExplored(self, newNode, direction): #TODO: debug :((
         newXYRobot = newNode.xyRobot
         newXYButters = newNode.xyButters
         if direction == "forward":
@@ -87,13 +87,17 @@ class BidirectionalBFS:
                 if newXYRobot == exNode.xyRobot:
                     z = [tuple(y) for y in newXYButters]
                     x = [tuple(y) for y in exNode.xyButters]
-                    return set(x) == set(z)
+                    if set(x) == set(z):
+                        return True
+            return False
         else:
             for exNode in self.backwardExplored:
                 if newXYRobot == exNode.xyRobot:
                     z = [tuple(y) for y in newXYButters]
                     x = [tuple(y) for y in exNode.xyButters]
-                    return set(x) == set(z)
+                    if set(x) == set(z):
+                        return True
+            return False
 
     def createNode(self, x, y, parentNode, action, butterMove, direction):
         node = Node(x, y)
@@ -334,10 +338,21 @@ class BidirectionalBFS:
             self.cost += node.cost
             self.path1 = self.path1[::-1]
             node = self.backwardLastNode
-            node.cost = 0
+            nodesPath2 = []
             while node.parent is not None:
+                nodesPath2.append(node)
                 self.path2.append(node.action)
-                self.cost += node.cost
+                # self.cost += node.cost
                 node = node.parent
-            self.cost += node.cost
+            # self.cost += node.cost
+            # for n in nodesPath2:
+            #     if self.checkGoal2(n):
+            #         index = nodesPath2.index(n)
+            #         self.path2 = self.path2[:index]
             self.path = self.path1 + self.path2
+            self.cost = len(self.path)
+
+    def checkGoal2(self, node):
+        z = [tuple(y) for y in self.tableInfo.xyPersons]
+        x = [tuple(y) for y in node.xyButters]
+        return set(x) == set(z)
