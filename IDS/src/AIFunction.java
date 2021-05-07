@@ -1,35 +1,31 @@
-import java.net.Socket;
 import java.util.*;
 
 public class AIFunction {
-/*    enum Solution {
-        SOLUTION,
-        FAILURE,
-        CUTOFF,
-        DUPLICATE
-    }*/
+
 
     public static void searchAlgorithm(Board board) {
-        Solution solution = null;
-        for (int i = 0; i < board.butters.size(); i++) {
+        Result solution = null;
+        int number = board.butters.size();
+        for (int i = 0; i < number; i++) {
+            board.explored = new ArrayList<>();
             solution = IDSNavigate(board);
-            if (solution.statues == "SOLUTION") {
-                System.out.println(solution.getBoard().movement + "\n" + (solution.getBoard().movement.length() + 1) + "\n" + solution.getBoard().movement.length());
+            if (solution.statues == Result.Solution.SUCCESS) {
+                System.out.println(solution.movement + "\n" + (solution.movement.length() + 1) + "\n" + solution.movement.length());
                 clearButter(solution.getBoard());
                 board = solution.getBoard();
             } else System.out.println("Can't pass the butter!");
-            //printResult(solution, actions, depth);
         }
     }
 
-    private static Solution IDSNavigate(Board board) {
+    private static Result IDSNavigate(Board board) {
         int limit = -1;
-        Solution solution = null;
+        Result solution = null;
         do {
-            ArrayList<String> explored = new ArrayList<>();
+            //ArrayList<String> explored = new ArrayList<>();
             limit++;
-            solution = DLS(board.clone(), limit, board.robot, "", explored);
-        } while ((solution.statues != "SOLUTION" || solution.statues != "FAILURE"));
+            solution = DLS(board.clone(), limit, board.robot, "");
+            //if (solution.statues.equals("CUTOFF")) System.out.println(limit+": "+board.explored);
+        } while (solution.statues.equals(Result.Solution.CUTOFF));
         return solution;
     }
 
@@ -48,38 +44,51 @@ public class AIFunction {
      * This algorithm uses depth-first search with a depth cutoff.
      * Depth at which nodes are not expanded.
      * <p>
-     * Three possible results:
+     * Four possible results:
      * 1.Solution
      * 2.Failure
      * 3.Cutoff(No solution with cutoff)
+     * 4.Duplicate
      *
-     * @param limit Depth cutoff
      * @param board
+     * @param limit
+     * @param robotMove
+     * @param direction
+     * @return
      */
-    public static Solution DLS(Board board, int limit, Node robotMove, String direction, ArrayList<String> explored) {
-        Solution solution = new Solution();
+    public static Result DLS(Board board, int limit, Node robotMove, String direction) {
+        Result solution = new Result();
         solution.setBoard(board);
-        if (explored.contains(robotMove.toString())) {
-            solution.statues = "DUPLICATE";
+        if (board.explored.contains(robotMove.toString())) {
+            solution.statues = Result.Solution.DUPLICATE;
             return solution;
         }
         board.robot = robotMove;
         if (board.butters.contains(board.robot.toString())) {
-            board.butters.set(board.butters.indexOf(board.robot.toString()), move(board.robot.toString(), direction));
+            int index = board.butters.indexOf(board.robot.toString());
+            board.butters.set(index, move(board.robot.toString(), direction));
+            if (positionMatch(board.persons, board.butters)) {
+                solution.statues = Result.Solution.SUCCESS;
+                return solution;
+            }
+            if (!isMoveAllowed(board, board.butters.get(index), "U") || !isMoveAllowed(board, board.butters.get(index), "D")) {
+                if (!isMoveAllowed(board, board.butters.get(index), "R") || !isMoveAllowed(board, board.butters.get(index), "L")) {
+                    solution.statues = Result.Solution.FAILURE;
+                    return solution;
+                }
+            }
+            board.explored = new ArrayList<>();
         }
-        explored.add(robotMove.toString());
+        board.explored.add(robotMove.toString());
         boolean cutoffOccurred = false;
         boolean duplicateOccurred = false;
         if (limit < 0) {
-            solution.statues = "FAILURE";
+            solution.statues = Result.Solution.FAILURE;
             return solution;
         }
-        if (positionMatch(board.persons, board.butters)) {
-            solution.statues = "SOLUTION";
-            return solution;
-        }
+
         if (limit == 0) {      // Check if limit is 0
-            solution.statues = "CUTOFF";
+            solution.statues = Result.Solution.CUTOFF;
             return solution;
         } else {
             HashMap<Node, String> frontier = new HashMap<>();
@@ -95,27 +104,27 @@ public class AIFunction {
 
             for (Node child : frontier.keySet()) {
                 if (child == null) {
-                    solution.statues = "FAILURE";
+                    solution.statues = Result.Solution.FAILURE;
                     return solution;
                 }
-                solution = DLS(board.clone(), limit - 1, child, frontier.get(child),explored);
-                if (solution.statues == "CUTOFF") cutoffOccurred = true;
-                else if (solution.statues == "DUPLICATE") duplicateOccurred = true;
-                else if (solution.statues != "FAILURE") {
-                    board.movement += frontier.get(child);
+                solution = DLS(board.clone(), limit - 1, child, frontier.get(child));
+                if (solution.statues == Result.Solution.CUTOFF) cutoffOccurred = true;
+                else if (solution.statues == Result.Solution.DUPLICATE) duplicateOccurred = true;
+                else if (solution.statues != Result.Solution.FAILURE) {
+                    solution.movement = frontier.get(child)+ "_" + solution.movement;
                     return solution;
                 }
             }
         }
 
         if (cutoffOccurred) {
-            solution.statues = "CUTOFF";
+            solution.statues = Result.Solution.CUTOFF;
             return solution;
         } else if (duplicateOccurred) {
-            solution.statues = "DUPLICATE";
+            solution.statues = Result.Solution.DUPLICATE;
             return solution;
         } else {
-            solution.statues = "FAILURE";
+            solution.statues = Result.Solution.FAILURE;
             return solution;
         }
     }
@@ -135,8 +144,8 @@ public class AIFunction {
         return isMoveAllowed(board, target, direction, 0);
     }
 
-    private static boolean isMoveAllowed(Board board, String target, String direction, int limit) {
-        String childPosition = move(target, direction);
+    private static boolean isMoveAllowed(Board board, String current, String direction, int limit) {
+        String childPosition = move(current, direction);
         if (!board.blocks.contains(childPosition))           // If it's not block
             if (board.batteries.containsKey(childPosition))     // If it's in batteries arraylist
                 if (board.butters.contains(childPosition)) {
@@ -146,7 +155,7 @@ public class AIFunction {
         return false;
     }
 
-    private static String move(String target, String direction) {
+    private static String move(String current, String direction) {
         int column = 0, row = 0;
         switch (direction.toUpperCase()) {
             case "R":
@@ -166,8 +175,8 @@ public class AIFunction {
                 row = 1;
                 break;
         }
-        String[] splittedPosition = target.split("_");
-        return (Integer.parseInt(splittedPosition[0]) + column) + "_" + (Integer.parseInt(splittedPosition[1])  + row);
+        String[] splittedPosition = current.split("_");
+        return (Integer.parseInt(splittedPosition[0]) + column) + "_" + (Integer.parseInt(splittedPosition[1]) + row);
     }
 
 }

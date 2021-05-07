@@ -10,9 +10,10 @@ public class Board {
     public ArrayList<String> blocks = new ArrayList<String>();
     public ArrayList<String> butters = new ArrayList<String>();
     public ArrayList<String> persons = new ArrayList<String>();
+    public ArrayList<String> explored = new ArrayList<String>();
     public Node robot;
     public int row, col;
-    public String movement ="";
+
 
     public void initial() {
 
@@ -74,11 +75,13 @@ public class Board {
         for (int i = 0; i < butters.size(); i++) {
             newBoard.butters.add(this.butters.get(i));
         }
+        for (int i = 0; i < explored.size(); i++) {
+            newBoard.explored.add(this.explored.get(i));
+        }
         newBoard.persons = this.persons;
         newBoard.robot = new Node(this.robot.row,this.robot.col);
         newBoard.row = this.row;
         newBoard.col= this.col;
-        newBoard.movement = this.movement;
         return newBoard;
     }
 }
