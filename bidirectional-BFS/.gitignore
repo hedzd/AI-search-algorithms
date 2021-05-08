@@ -3,3 +3,4 @@
 .idea/*
 /shelf/
 /workspace.xml
+__pycache__/*

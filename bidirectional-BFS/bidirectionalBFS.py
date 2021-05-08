@@ -33,22 +33,16 @@ class BidirectionalBFS:
             if self.forwardFringe.empty():
                 return False
             currNode = self.forwardFringe.get()
+            isGoal, backwardLastNode = self.checkGoal(currNode, "forward")
+            if isGoal:
+                self.forwardLastNode = currNode
+                self.backwardLastNode = backwardLastNode
+                return True
             xyList, action, butterMove = self.successor(currNode)
-            # print("dequeue node:", node.state)
-            # print("current state: ", state)
-            # print("current state xyButt: ", node.xyButters)
-            # print("succ: ",successor)
-            # print("action: ", action)
-            # print("buttMove: ", butterMove)
             for i, xy in enumerate(xyList):
                 newNode = self.createNode(xy[0], xy[1], currNode, action[i], butterMove[i], "forward")
                 if self.checkExplored(newNode, "forward"):
                     continue
-                isGoal, backwardLastNode = self.checkGoal(newNode, "forward")
-                if isGoal:
-                    self.forwardLastNode = newNode
-                    self.backwardLastNode = backwardLastNode
-                    return True
 
                 # print("enqueue node:", newNode.state)
                 self.forwardFringe.put(newNode)
@@ -59,19 +53,20 @@ class BidirectionalBFS:
             # print()
 
             # BACKWARD SEARCH
-            if self.forwardFringe.empty():
+            if self.backwardFringe.empty():
                 return False
             currNode = self.backwardFringe.get()
+            isGoal, forwardLastNode = self.checkGoal(currNode, "backward")
+            if isGoal:
+                self.forwardLastNode = forwardLastNode
+                self.backwardLastNode = currNode
+                return True
             xyList, action, butterMove = self.predecessor(currNode)
             for i, xy in enumerate(xyList):
                 newNode = self.createNode(xy[0], xy[1], currNode, action[i], butterMove[i], "backward")
                 if self.checkExplored(newNode, "backward"):
                     continue
-                isGoal, forwardLastNode = self.checkGoal(newNode, "backward")
-                if isGoal:
-                    self.forwardLastNode = forwardLastNode
-                    self.backwardLastNode = newNode
-                    return True
+
                 self.backwardFringe.put(newNode)
             self.backwardExplored.append(currNode)
             # print("back explored: ", end="")
@@ -79,7 +74,7 @@ class BidirectionalBFS:
             #     print(exp.state, end=", ")
             # print()
 
-    def checkExplored(self, newNode, direction): #TODO: debug :((
+    def checkExplored(self, newNode, direction):
         newXYRobot = newNode.xyRobot
         newXYButters = newNode.xyButters
         if direction == "forward":
@@ -137,6 +132,7 @@ class BidirectionalBFS:
 
     def checkGoal(self, node, direction):
         if direction == "forward":
+            l1 = list(self.backwardFringe.queue)
             for otherNode in self.backwardExplored:
                 if node.xyRobot == otherNode.xyRobot:
                     z = [tuple(y) for y in node.xyButters]
@@ -144,6 +140,7 @@ class BidirectionalBFS:
                     if set(x) == set(z):
                         return True, otherNode
         else:
+            l1 = list(self.forwardFringe.queue)
             for otherNode in self.forwardExplored:
                 if node.xyRobot == otherNode.xyRobot:
                     z = [tuple(y) for y in node.xyButters]
@@ -320,9 +317,7 @@ class BidirectionalBFS:
 
     def calcPathAndCost(self):
         res = self.searchAlgorithm()
-        if not res:
-            print("can't pass the butter")
-        else:
+        if res:
             # print("f: ",self.forwardLastNode.state)
             # print("f: ", self.forwardLastNode.parent.state)
             # print("f: ", self.forwardLastNode.parent.parent.state)
@@ -344,11 +339,12 @@ class BidirectionalBFS:
                 self.path2.append(node.action)
                 # self.cost += node.cost
                 node = node.parent
-            # self.cost += node.cost
-            # for n in nodesPath2:
-            #     if self.checkGoal2(n):
-            #         index = nodesPath2.index(n)
-            #         self.path2 = self.path2[:index]
+            self.cost += node.cost
+            for n in nodesPath2:
+                if self.checkGoal2(n):
+                    # self.backwardLastNode = n
+                    index = nodesPath2.index(n)
+                    self.path2 = self.path2[:index]
             self.path = self.path1 + self.path2
             self.cost = len(self.path)
 

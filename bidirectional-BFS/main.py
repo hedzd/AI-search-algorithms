@@ -20,34 +20,36 @@ def main():
     # print(table.matrix)
 
     #bbfs
-    # bbfs = BidirectionalBFS(table)
-    #
-    # bbfs.calcPathAndCost()
-    # if not bbfs.path:
-    #     print("path:   ", bbfs.path)
-    #     print("cost:   ", bbfs.cost)
-    #     print("depth:  ")
-    # else:
-    #     print("Can't pass the butter")
-    # #Draw
-    # draw = DrawBoard(table, bbfs.path)
-    # draw.draw()
+    bbfs = BidirectionalBFS(table)
+
+    bbfs.calcPathAndCost()
+    if not bbfs.path:
+        print("Can't pass the butter")
+    else:
+        print("path:   ", bbfs.path)
+        print("cost:   ", bbfs.cost)
+        print("depthForward:  ", bbfs.forwardLastNode.depth)
+        print("depthBackward: ", len(bbfs.path2))
+        print("sum of depth: ", len(bbfs.path))
+    #Draw
+    draw = DrawBoard(table, bbfs.path)
+    draw.draw()
 
 
     #aStar
-    aStar = AStar(table)
-    aStar.calcPathAndCost()
-    if not aStar.path:
-        print("Can't pass the butter")
-    else:
-        print("path:   ", aStar.path)
-        print("cost:   ", aStar.cost)
-        print("depth: ", aStar.lastNode.depth)
-
-
-    # Draw
-    draw = DrawBoard(table, aStar.path)
-    draw.draw()
+    # aStar = AStar(table)
+    # aStar.calcPathAndCost()
+    # if not aStar.path:
+    #     print("Can't pass the butter")
+    # else:
+    #     print("path:   ", aStar.path)
+    #     print("cost:   ", aStar.cost)
+    #     print("depth: ", aStar.lastNode.depth)
+    #
+    #
+    # # Draw
+    # draw = DrawBoard(table, aStar.path)
+    # draw.draw()
 
 if __name__ == '__main__':
     main()
