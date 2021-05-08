@@ -28,9 +28,9 @@ class AStar:
                 self.lastNode = currNode
                 return True
             xyList, action, butterMove = self.successor(currNode)
-            print("current node xyRobot:", currNode.xyRobot)
-            print("current state xyButt: ", currNode.xyButters)
-            print("current state eval: ", currNode.evaluation)
+            # print("current node xyRobot:", currNode.xyRobot)
+            # print("current state xyButt: ", currNode.xyButters)
+            # print("current state eval: ", currNode.evaluation)
             # print("xy list: ", xyList)
             # print("action: ", action)
             # print("buttMove: ", butterMove)
@@ -55,7 +55,7 @@ class AStar:
         y = self.tableInfo.xyRobot[1]
         node = Node(x, y)
         node.cost = int(self.tableInfo.matrix[y][x])
-        node.depth = 1
+        node.depth = 0
         node.xyButters = self.tableInfo.xyButters
         node.state = [node.xyRobot, node.xyButters]
         self.calcNodeEvaluation(node)
@@ -63,6 +63,7 @@ class AStar:
 
     def calcNodeEvaluation(self, node):
         h = 0
+        xyMin = None
         minDistFromButter = 5000
         for xy in node.xyButters:
             dist = (abs(xy[1] - node.xyRobot[1]) + abs(xy[0] - node.xyRobot[0]))
@@ -70,15 +71,17 @@ class AStar:
                 minDistFromButter = dist
                 xyMin = xy
 
+        h += minDistFromButter
+        # if not node.butterMove:
         minDistFromPerson = 5000
         for xyP in self.tableInfo.xyPersons:
-            dist = (abs(xy[1] - xyP[1]) + abs(xy[0] - xyP[0]))
+            dist = (abs(xyMin[1] - xyP[1]) + abs(xyMin[0] - xyP[0]))
             if dist < minDistFromPerson:
                 minDistFromPerson = dist
+
         h += minDistFromPerson
 
-        node.evaluation = h + node.cost - x
-        #+ node.cost
+        node.evaluation = h + node.cost + node.depth
 
     def checkExplored(self, newNode):
         newXYRobot = newNode.xyRobot
@@ -197,13 +200,11 @@ class AStar:
 
     def calcPathAndCost(self):
         res = self.searchAlgorithm()
-        if not res:
-            print("can't pass the butter")
-        else:
+        if res:
             node = self.lastNode
             while node.parent is not None:
                 self.path.append(node.action)
                 self.cost += node.cost
                 node = node.parent
-            self.cost += node.cost
+            # self.cost += node.cost
             self.path = self.path[::-1]
