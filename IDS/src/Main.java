@@ -7,5 +7,7 @@ public class Main {
         board.initial();
         // IDS Search
         AIFunction.searchAlgorithm(board);
+        //User Interface
+       // GameControler boardGame= new GameControler(board);
     }
 }
