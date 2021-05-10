@@ -2,7 +2,10 @@ import java.util.*;
 
 public class AIFunction {
 
-
+    /**
+     * Repeat the IDS function for number of butters.
+     * @param board
+     */
     public static void searchAlgorithm(Board board) {
         Result solution = null;
         int number = board.butters.size();
@@ -17,6 +20,11 @@ public class AIFunction {
         }
     }
 
+    /**
+     * Repeat DLS algorithm until it reaches success or failure!
+     * @param board
+     * @return
+     */
     private static Result IDSNavigate(Board board) {
         int limit = -1;
         Result solution = null;
@@ -29,6 +37,10 @@ public class AIFunction {
         return solution;
     }
 
+    /**
+     * Delete visited butters and persons!
+     * @param board
+     */
     private static void clearButter(Board board) {
         for (String eachButter : board.butters) {
             if (board.persons.contains(eachButter)) {
@@ -129,7 +141,12 @@ public class AIFunction {
         }
     }
 
-
+    /**
+     * Goal testing - Check if we reach to the goal.
+     * @param persons
+     * @param butters
+     * @return
+     */
     private static boolean positionMatch(ArrayList<String> persons, ArrayList<String> butters) {
         for (String eachButter : butters) {
             if (persons.contains(eachButter)) {
@@ -139,7 +156,13 @@ public class AIFunction {
         return false;
     }
 
-
+    /**
+     * Check if it is ok to move or not.
+     * @param board
+     * @param target
+     * @param direction
+     * @return boolean
+     */
     private static boolean isMoveAllowed(Board board, String target, String direction) {
         return isMoveAllowed(board, target, direction, 0);
     }
@@ -155,6 +178,12 @@ public class AIFunction {
         return false;
     }
 
+    /**
+     * Map the direction to position.
+     * @param current
+     * @param direction
+     * @return
+     */
     private static String move(String current, String direction) {
         int column = 0, row = 0;
         switch (direction.toUpperCase()) {
