@@ -15,10 +15,13 @@ class BidirectionalBFS:
         self.backwardExplored = []
         self.forwardLastNode = None
         self.backwardLastNode = None
+        self.numAllNodes = 0
+        self.numVisitedNodes = 0
 
     def searchAlgorithm(self):
         initialNode = self.createInitialNode()
         finalNode = self.createFinalNode()
+        self.numAllNodes += 2
         if finalNode is None:
             return False
         if initialNode.state == finalNode.state:
@@ -41,11 +44,13 @@ class BidirectionalBFS:
             xyList, action, butterMove = self.successor(currNode)
             for i, xy in enumerate(xyList):
                 newNode = self.createNode(xy[0], xy[1], currNode, action[i], butterMove[i], "forward")
+
                 if self.checkExplored(newNode, "forward"):
                     continue
-
+                self.numAllNodes += 1
                 # print("enqueue node:", newNode.state)
                 self.forwardFringe.put(newNode)
+                self.numVisitedNodes += 1
             self.forwardExplored.append(currNode)
             # print("explored: ", end="")
             # for exp in self.forwardExplored:
@@ -64,10 +69,12 @@ class BidirectionalBFS:
             xyList, action, butterMove = self.predecessor(currNode)
             for i, xy in enumerate(xyList):
                 newNode = self.createNode(xy[0], xy[1], currNode, action[i], butterMove[i], "backward")
+
                 if self.checkExplored(newNode, "backward"):
                     continue
-
+                self.numAllNodes += 1
                 self.backwardFringe.put(newNode)
+                self.numVisitedNodes += 1
             self.backwardExplored.append(currNode)
             # print("back explored: ", end="")
             # for exp in self.backwardExplored:
@@ -93,6 +100,8 @@ class BidirectionalBFS:
                     if set(x) == set(z):
                         return True
             return False
+
+
 
     def createNode(self, x, y, parentNode, action, butterMove, direction):
         node = Node(x, y)
@@ -203,6 +212,7 @@ class BidirectionalBFS:
             if self.checkRobotCell(x + 1, y):
                 if [x + 1, y] in node.xyButters:
                     if self.checkButterCell(x + 1, y, 'R'):
+
                         butterMove.append(True)
                         xyList.append([x + 1, y])
                         actionList.append('R')

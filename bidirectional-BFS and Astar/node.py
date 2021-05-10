@@ -1,7 +1,7 @@
 class Node:
     def __init__(self, x, y):
         self.xyRobot = [int(x), int(y)]
-        self.child = []
+        # self.child = []
         self.parent = None
         self.action = None
         self.depth = None

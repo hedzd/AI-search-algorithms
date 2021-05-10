@@ -13,9 +13,12 @@ class AStar:
         self.fringe = []
         self.explored = []
         self.lastNode = None
+        self.numAllNodes = 0
+        self.numVisitedNodes = 0
 
     def searchAlgorithm(self):
         initialNode = self.createInitialNode()
+        self.numAllNodes += 1
         self.fringe.append(initialNode)
         while True:
             if not self.fringe:
@@ -38,7 +41,9 @@ class AStar:
                 newNode = self.createNode(xy[0], xy[1], currNode, action[i], butterMove[i])
                 if self.checkExplored(newNode):
                     continue
+                self.numAllNodes += 1
                 self.fringe.append(newNode)
+            self.numVisitedNodes += 1
             self.explored.append(currNode)
             # print("explored:")
             # for e in self.explored:
@@ -54,7 +59,7 @@ class AStar:
         x = self.tableInfo.xyRobot[0]
         y = self.tableInfo.xyRobot[1]
         node = Node(x, y)
-        node.cost = int(self.tableInfo.matrix[y][x])
+        node.cost = 0
         node.depth = 0
         node.xyButters = self.tableInfo.xyButters
         node.state = [node.xyRobot, node.xyButters]
@@ -72,7 +77,7 @@ class AStar:
                 xyMin = xy
 
         h += minDistFromButter
-        # if not node.butterMove:
+
         minDistFromPerson = 5000
         for xyP in self.tableInfo.xyPersons:
             dist = (abs(xyMin[1] - xyP[1]) + abs(xyMin[0] - xyP[0]))
@@ -81,7 +86,7 @@ class AStar:
 
         h += minDistFromPerson
 
-        node.evaluation = h + node.cost + node.depth
+        node.evaluation = h + node.cost
 
     def checkExplored(self, newNode):
         newXYRobot = newNode.xyRobot
@@ -176,7 +181,7 @@ class AStar:
 
     def createNode(self, x, y, parentNode, action, butterMove):
         node = Node(x, y)
-        node.cost = int(self.tableInfo.matrix[y][x])
+        node.cost = int(self.tableInfo.matrix[y][x]) + parentNode.cost
         node.depth = parentNode.depth + 1
         node.parent = parentNode
         node.action = action
@@ -204,7 +209,8 @@ class AStar:
             node = self.lastNode
             while node.parent is not None:
                 self.path.append(node.action)
-                self.cost += node.cost
+                ## self.cost += node.cost
                 node = node.parent
             # self.cost += node.cost
             self.path = self.path[::-1]
+            self.cost = self.lastNode.cost
