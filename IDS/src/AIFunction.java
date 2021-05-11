@@ -1,27 +1,36 @@
 import java.util.*;
 
 public class AIFunction {
+    public static long expand = 0, generate = 0, depth = 0;
+    public static ArrayList<String> history = new ArrayList<>();
 
     /**
      * Repeat the IDS function for number of butters.
+     *
      * @param board
      */
-    public static void searchAlgorithm(Board board) {
+    public static Main.Statistics searchAlgorithm(Board board) {
         Result solution = null;
+        Main.Statistics statistics = new Main.Statistics();
         int number = board.butters.size();
         for (int i = 0; i < number; i++) {
             board.explored = new ArrayList<>();
             solution = IDSNavigate(board);
             if (solution.statues == Result.Solution.SUCCESS) {
-                System.out.println(solution.movement + "\n" + (solution.movement.length() + 1) + "\n" + solution.movement.length());
+                System.out.println(solution.movement + "\n" + (solution.movement.replaceAll("\\s+", "").length() + 1) + "\n" + solution.movement.replaceAll("\\s+", "").length());
                 clearButter(solution.getBoard());
                 board = solution.getBoard();
             } else System.out.println("Can't pass the butter!");
         }
+        statistics.expandedNode = generate;
+        statistics.generatedNode = expand;
+        statistics.depth = depth;
+        return statistics;
     }
 
     /**
      * Repeat DLS algorithm until it reaches success or failure!
+     *
      * @param board
      * @return
      */
@@ -31,14 +40,17 @@ public class AIFunction {
         do {
             //ArrayList<String> explored = new ArrayList<>();
             limit++;
-            solution = DLS(board.clone(), limit, board.robot, "");
+            Board tempBoard = board.clone();
+            solution = DLS(tempBoard, limit, board.robot, "");
             //if (solution.statues.equals("CUTOFF")) System.out.println(limit+": "+board.explored);
         } while (solution.statues.equals(Result.Solution.CUTOFF));
+        depth += limit;
         return solution;
     }
 
     /**
      * Delete visited butters and persons!
+     *
      * @param board
      */
     private static void clearButter(Board board) {
@@ -69,6 +81,7 @@ public class AIFunction {
      * @return
      */
     public static Result DLS(Board board, int limit, Node robotMove, String direction) {
+        expand++;
         Result solution = new Result();
         solution.setBoard(board);
         if (board.explored.contains(robotMove.toString())) {
@@ -100,20 +113,30 @@ public class AIFunction {
         }
 
         if (limit == 0) {      // Check if limit is 0
-            solution.statues = Result.Solution.CUTOFF;
+            Collections.sort(board.explored);
+            if (history.contains(board.explored.toString())) {
+                solution.statues = Result.Solution.FAILURE;
+            } else {
+                history.add(board.explored.toString());
+                solution.statues = Result.Solution.CUTOFF;
+            }
             return solution;
         } else {
             HashMap<Node, String> frontier = new HashMap<>();
-
-            if (isMoveAllowed(board, board.robot.toString(), "R"))
+            if (isMoveAllowed(board, board.robot.toString(), "R")) {
                 frontier.put(new Node(board.robot.row + 0, board.robot.col + 1), "R");
-            if (isMoveAllowed(board, board.robot.toString(), "U"))
+            }
+            if (isMoveAllowed(board, board.robot.toString(), "U")) {
                 frontier.put(new Node(board.robot.row - 1, board.robot.col + 0), "U");
-            if (isMoveAllowed(board, board.robot.toString(), "L"))
+            }
+            if (isMoveAllowed(board, board.robot.toString(), "L")) {
                 frontier.put(new Node(board.robot.row + 0, board.robot.col - 1), "L");
-            if (isMoveAllowed(board, board.robot.toString(), "D"))
+            }
+            if (isMoveAllowed(board, board.robot.toString(), "D")) {
                 frontier.put(new Node(board.robot.row + 1, board.robot.col + 0), "D");
+            }
 
+            generate += frontier.size();
             for (Node child : frontier.keySet()) {
                 if (child == null) {
                     solution.statues = Result.Solution.FAILURE;
@@ -123,7 +146,7 @@ public class AIFunction {
                 if (solution.statues == Result.Solution.CUTOFF) cutoffOccurred = true;
                 else if (solution.statues == Result.Solution.DUPLICATE) duplicateOccurred = true;
                 else if (solution.statues != Result.Solution.FAILURE) {
-                    solution.movement = frontier.get(child)+ "_" + solution.movement;
+                    solution.movement = frontier.get(child) + " " + solution.movement;
                     return solution;
                 }
             }
@@ -143,6 +166,7 @@ public class AIFunction {
 
     /**
      * Goal testing - Check if we reach to the goal.
+     *
      * @param persons
      * @param butters
      * @return
@@ -158,6 +182,7 @@ public class AIFunction {
 
     /**
      * Check if it is ok to move or not.
+     *
      * @param board
      * @param target
      * @param direction
@@ -180,6 +205,7 @@ public class AIFunction {
 
     /**
      * Map the direction to position.
+     *
      * @param current
      * @param direction
      * @return
