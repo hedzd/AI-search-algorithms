@@ -109,7 +109,7 @@ class AStar:
         if x + 1 < self.tableInfo.column:
             if self.checkRobotCell(x + 1, y):
                 if [x + 1, y] in node.xyButters:
-                    if self.checkButterCell(x + 1, y, 'R'):
+                    if self.checkButterCell(x + 1, y, 'R', node):
                         butterMove.append(True)
                         xyList.append([x + 1, y])
                         actionList.append('R')
@@ -121,7 +121,7 @@ class AStar:
         if x - 1 >= 0:
             if self.checkRobotCell(x - 1, y):
                 if [x - 1, y] in node.xyButters:
-                    if self.checkButterCell(x - 1, y, 'L'):
+                    if self.checkButterCell(x - 1, y, 'L', node):
                         butterMove.append(True)
                         xyList.append([x - 1, y])
                         actionList.append('L')
@@ -133,7 +133,7 @@ class AStar:
         if y + 1 < self.tableInfo.row:
             if self.checkRobotCell(x, y + 1):
                 if [x, y + 1] in node.xyButters:
-                    if self.checkButterCell(x, y + 1, 'D'):
+                    if self.checkButterCell(x, y + 1, 'D', node):
                         butterMove.append(True)
                         xyList.append([x, y + 1])
                         actionList.append('D')
@@ -144,7 +144,7 @@ class AStar:
         if y - 1 >= 0:
             if self.checkRobotCell(x, y - 1):
                 if [x, y - 1] in node.xyButters:
-                    if self.checkButterCell(x, y - 1, 'U'):
+                    if self.checkButterCell(x, y - 1, 'U', node):
                         butterMove.append(True)
                         xyList.append([x, y - 1])
                         actionList.append('U')
@@ -164,18 +164,18 @@ class AStar:
                 return False
         return True
 
-    def checkButterCell(self, x, y, action):
+    def checkButterCell(self, x, y, action, node):
         if action == 'R':
-            if x + 1 >= self.tableInfo.column or self.tableInfo.matrix[y][x + 1] == 'x':
+            if x + 1 >= self.tableInfo.column or self.tableInfo.matrix[y][x + 1] == 'x' or [x + 1, y] in node.xyButters:
                 return False
         if action == 'L':
-            if x - 1 < 0 or self.tableInfo.matrix[y][x - 1] == 'x':
+            if x - 1 < 0 or self.tableInfo.matrix[y][x - 1] == 'x' or [x - 1, y] in node.xyButters:
                 return False
         if action == 'U':
-            if y - 1 < 0 or self.tableInfo.matrix[y - 1][x] == 'x':
+            if y - 1 < 0 or self.tableInfo.matrix[y - 1][x] == 'x' or [x, y - 1] in node.xyButters:
                 return False
         if action == 'D':
-            if y + 1 >= self.tableInfo.row or self.tableInfo.matrix[y + 1][x] == 'x':
+            if y + 1 >= self.tableInfo.row or self.tableInfo.matrix[y + 1][x] == 'x' or [x, y + 1] in node.xyButters:
                 return False
         return True
 
